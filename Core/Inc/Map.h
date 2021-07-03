@@ -27,7 +27,6 @@ struct mario_state current_state;
 int map[4][60];
 
 #endif /* INC_MAPCREATOR_H_ */
-int initialized_map;
 int is_game_over ;
 
 

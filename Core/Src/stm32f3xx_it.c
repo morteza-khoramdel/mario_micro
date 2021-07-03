@@ -57,6 +57,7 @@
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
+extern ADC_HandleTypeDef hadc2;
 extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim3;
 /* USER CODE BEGIN EV */
@@ -201,18 +202,38 @@ void SysTick_Handler(void)
 /******************************************************************************/
 
 /**
+  * @brief This function handles ADC1 and ADC2 interrupts.
+  */
+void ADC1_2_IRQHandler(void)
+{
+  /* USER CODE BEGIN ADC1_2_IRQn 0 */
+
+  /* USER CODE END ADC1_2_IRQn 0 */
+  HAL_ADC_IRQHandler(&hadc2);
+  /* USER CODE BEGIN ADC1_2_IRQn 1 */
+    int x = HAL_ADC_GetValue(&hadc2);
+    float func = ((float) (x * 20) /4095);
+    int tmp = (int)func;
+    if(tmp < 5 ){
+    	tmp = 5 ;
+    }
+    HAL_ADC_Start_IT(&hadc2);
+  /* USER CODE END ADC1_2_IRQn 1 */
+}
+
+/**
   * @brief This function handles TIM2 global interrupt.
   */
 void TIM2_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM2_IRQn 0 */
-
+	if ( !is_game_over) {
+			shift_display();
+		}
   /* USER CODE END TIM2_IRQn 0 */
   HAL_TIM_IRQHandler(&htim2);
   /* USER CODE BEGIN TIM2_IRQn 1 */
-	if (initialized_map && !is_game_over) {
-		shift_display();
-	}
+
   /* USER CODE END TIM2_IRQn 1 */
 }
 
@@ -222,18 +243,20 @@ void TIM2_IRQHandler(void)
 void TIM3_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM3_IRQn 0 */
-
+	if (!is_game_over  ) {
+	  		print_mario();
+	  	}
   /* USER CODE END TIM3_IRQn 0 */
   HAL_TIM_IRQHandler(&htim3);
   /* USER CODE BEGIN TIM3_IRQn 1 */
-  if (initialized_map && !is_game_over) {
-  		print_mario();
-  	}
+
   /* USER CODE END TIM3_IRQn 1 */
 }
 
 /* USER CODE BEGIN 1 */
 void print_mario(){
+	setCursor(current_state.clo, current_state.row);
+	write(MARIO);
 
 }
 /* USER CODE END 1 */

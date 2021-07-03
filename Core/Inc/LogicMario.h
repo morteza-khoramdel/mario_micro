@@ -9,5 +9,5 @@
 #define INC_LOGICMARIO_H_
 
 #endif /* INC_LOGICMARIO_H_ */
-int froward();
+int check_froward();
 int jump();

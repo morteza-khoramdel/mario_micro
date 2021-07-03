@@ -21,13 +21,14 @@ struct mario_state {
 	int row;
 	int clo;
 	int score;
-	int health	 ;
+	int health;
 };
 struct mario_state current_state;
 int map[4][60];
-
+int start;
 #endif /* INC_MAPCREATOR_H_ */
 int is_game_over ;
+int current_start_map ; //start map from this variable to after 20
 
 
 void create_rows();

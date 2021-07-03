@@ -15,7 +15,9 @@ byte Ground[] = { 0x1F, 0x1F, 0x11, 0x1B, 0x15, 0x1B, 0x11, 0x1F };
 byte Flag[] = { 0x03, 0x07, 0x0F, 0x1F, 0x01, 0x01, 0x01, 0x01 };
 byte Blade[] = { 0x18, 0x1F, 0x1F, 0x18, 0x18, 0x1F, 0x1F, 0x18 };
 byte None[] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-int current_start_map = 0; //start map from this variable to after 20
+extern TIM_HandleTypeDef htim2;
+extern TIM_HandleTypeDef htim3;
+
 void create_rows() {
 	srand(time(0));
 	init_custom_chars();
@@ -25,22 +27,12 @@ void create_rows() {
 		map[var][0] = BLADE;
 		write(BLADE);
 	}
-	//init mario
-	map[2][2] = MARIO;
-	current_state.row = 2;
-	current_state.clo = 2;
-	current_state.health = 3;
-	setCursor(2, 2);
-	write(MARIO);
-	//init flag
-	map[2][59] = FLAG;
 	//generate rows
 	row_zero();
 	row_one();
 	row_two();
 	row_three();
 	init_print_map();
-	display();
 }
 void row_zero() {
 
@@ -63,7 +55,15 @@ void row_one() {
 }
 
 void row_two() {
-	for (int var = 2; var < 60; ++var) {
+	//init mario
+	map[2][2] = MARIO;
+	current_state.row = 2;
+	current_state.clo = 2;
+	current_state.health = 3;
+	map[2][1] = NONE;
+	//init flag
+	map[2][59] = FLAG;
+	for (int var = 3; var < 60; ++var) {
 		int random = rand();
 		if (random % 5 == 0) {
 			if (var != 59) {
@@ -108,39 +108,19 @@ void init_custom_chars() {
 
 }
 void init_print_map() {
-	//row zero
-	for (int var = 1; var < 20; ++var) {
-		setCursor(var, 0);
-//		if (map[0][var] == BRICK) {
-//			write(BRICK);
-//		} else if (map[0][var] == QUESTION_BOX) {
-//			write(QUESTION_BOX);
-//		} else if (map[0][var] == NONE) {
-//			write(NONE);
-//		}
+	setCursor(1, 0);
+	for (int i = 1; i < 20; i++) {
+		write(map[0][i]);
+	}
+	setCursor(1, 2);
+	for (int i = 1; i < 20; i++) {
+		write(map[2][i]);
+	}
+	setCursor(1, 3);
+	for (int i = 1; i < 20; i++) {
+		write(map[3][i]);
 	}
 
-	//row two
-	for (int var = 1; var < 20; ++var) {
-		setCursor(var, 2);
-//		if (map[2][var] == PIPE_LEFT) {
-//			write(PIPE_LEFT);
-//		} else if (map[2][var] == PIPE_RIGHT) {
-//			write(PIPE_RIGHT);
-//		} else if (map[2][var] == NONE) {
-//			write(NONE);
-//		}
-	}
-
-	//row three
-	for (int var = 1; var < 20; ++var) {
-		setCursor(var, 3);
-//		if (map[3][var] == GROUND) {
-//			write(GROUND);
-//		} else if (map[3][var] == NONE) {
-//			write(NONE);
-//		}
-	}
 }
 void print_map() {
 	//flag
@@ -148,13 +128,20 @@ void print_map() {
 		setCursor(59, 2);
 		write(FLAG);
 	}
-
-	// reduce health and game over
-	if (current_state.clo == current_start_map) {
-
+	//if go to pit
+	if (current_state.row == 3) {
 		if (current_state.health > 0) {
 			current_state.health = current_state.health - 1;
+			setCursor(current_state.clo - current_start_map+ 2, current_state.row);
+			write(NONE);
+			map[current_state.row][current_state.clo] = NONE;
 			current_start_map = 0;
+			current_state.clo = 2;
+			current_state.row = 2;
+			map[current_state.row][current_state.clo] = MARIO;
+			HAL_TIM_Base_Stop_IT(&htim2);
+			HAL_TIM_Base_Stop_IT(&htim3);
+			start = 0;
 		} else {
 			is_game_over = 1;
 			clear();
@@ -167,48 +154,52 @@ void print_map() {
 		}
 		return;
 	}
-	//update mario state
-	setCursor(current_state.clo, current_state.row);
-	write(NONE);
-	current_state.clo = current_state.clo + 1;
-	//row zero
-	for (int var = current_start_map + 1; var < current_start_map + 20; ++var) {
-		setCursor(var - current_start_map, 0);
-//		if (map[0][var] == BRICK) {
-//			write(BRICK);
-//		} else if (map[0][var] == QUESTION_BOX) {
-//			write(QUESTION_BOX);
-//		} else if (map[0][var] == NONE) {
-//			write(NONE);
-//		}
-		write(map[0][var]);
+	// reduce health and game over for waiting mario
+	if (current_state.clo == current_start_map -1) {
+
+		if (current_state.health > 0) {
+			current_state.health = current_state.health - 1;
+			setCursor(current_state.clo - current_start_map + 2, current_state.row);
+			write(NONE);
+			map[current_state.row][current_state.clo] = NONE;
+			current_start_map = 0;
+			current_state.clo = 2;
+			current_state.row = 2;
+			map[current_state.row][current_state.clo] = MARIO;
+			start = 0;
+			HAL_TIM_Base_Stop_IT(&htim2);
+			HAL_TIM_Base_Stop_IT(&htim3);
+		} else {
+			is_game_over = 1;
+			clear();
+			setCursor(6, 2);
+			print("GAME OVER");
+			setCursor(0, 0);
+			HAL_TIM_Base_Stop_IT(&htim2);
+			HAL_TIM_Base_Stop_IT(&htim3);
+
+		}
+		return;
+	}
+	setCursor(1, 0);
+	for (int i = current_start_map ; i < current_start_map + 19; i++) {
+	     if (map[0][i] != MARIO) {
+			write(map[0][i]);
+		}
+	}
+	setCursor(1, 2);
+	for (int i = current_start_map ; i < current_start_map + 19; i++) {
+		if (map[2][i] != MARIO) {
+			write(map[2][i]);
+		}
+	}
+	setCursor(1, 3);
+	for (int i = current_start_map; i < current_start_map + 19; i++) {
+		if (map[3][i] != MARIO) {
+			write(map[3][i]);
+		}
 	}
 
-	//row two
-	for (int var = current_start_map + 1; var < current_start_map + 20; ++var) {
-		setCursor(var - current_start_map, 2);
-//		if (map[2][var] == PIPE_LEFT) {
-//			write(PIPE_LEFT);
-//		} else if (map[2][var] == PIPE_RIGHT) {
-//			write(PIPE_RIGHT);
-//		} else if (map[2][var] == NONE) {
-//			write(NONE);
-//		}
-		write(map[2][var]);
-
-	}
-
-	//row three
-	for (int var = current_start_map + 1; var < current_start_map + 20; ++var) {
-		setCursor(var - current_start_map, 3);
-//		if (map[3][var] == GROUND) {
-//			write(GROUND);
-//		} else if (map[3][var] == NONE) {
-//			write(NONE);
-//		}
-		write(map[3][var]);
-
-	}
 }
 void shift_display() {
 	if (current_start_map + 20 < 60) {

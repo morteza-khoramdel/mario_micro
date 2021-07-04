@@ -40,3 +40,6 @@ void init_print_map();
 void clear_display();
 void row_one();
 void shift_display();
+void shift_mario();
+void init_blade();
+void reset_state();

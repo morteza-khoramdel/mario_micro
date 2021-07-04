@@ -62,7 +62,6 @@ void EXTI2_TSC_IRQHandler(void);
 void EXTI3_IRQHandler(void);
 void ADC1_2_IRQHandler(void);
 void TIM2_IRQHandler(void);
-void TIM3_IRQHandler(void);
 /* USER CODE BEGIN EFP */
 void print_mario();
 /* USER CODE END EFP */

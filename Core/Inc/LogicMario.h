@@ -10,4 +10,8 @@
 
 #endif /* INC_LOGICMARIO_H_ */
 int check_froward();
-int jump();
+void jump();
+int type_jump();
+void jump_up();
+void jump_down();
+

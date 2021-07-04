@@ -56,16 +56,17 @@ void row_one() {
 
 void row_two() {
 	//init mario
-	map[2][2] = MARIO;
-	current_state.row = 2;
-	current_state.clo = 2;
+	map[2][3] = MARIO; //16
+	current_state.row = 2; //2
+	current_state.clo = 3; //16 //47 1000
 	current_state.health = 3;
+	map[2][2] = NONE;
 	map[2][1] = NONE;
 	//init flag
 	map[2][59] = FLAG;
-	for (int var = 3; var < 60; ++var) {
+	for (int var = 4; var < 60; ++var) {
 		int random = rand();
-		if (random % 5 == 0) {
+		if (random % 13 == 0) {
 			if (var != 59) {
 				map[2][var] = PIPE_LEFT;
 				map[2][var + 1] = PIPE_RIGHT;
@@ -128,38 +129,14 @@ void print_map() {
 		setCursor(59, 2);
 		write(FLAG);
 	}
-	//if go to pit
-	if (current_state.row == 3) {
-		if (current_state.health > 0) {
-			current_state.health = current_state.health - 1;
-			setCursor(current_state.clo - current_start_map+ 2, current_state.row);
-			write(NONE);
-			map[current_state.row][current_state.clo] = NONE;
-			current_start_map = 0;
-			current_state.clo = 2;
-			current_state.row = 2;
-			map[current_state.row][current_state.clo] = MARIO;
-			HAL_TIM_Base_Stop_IT(&htim2);
-			HAL_TIM_Base_Stop_IT(&htim3);
-			start = 0;
-		} else {
-			is_game_over = 1;
-			clear();
-			setCursor(6, 2);
-			print("GAME OVER");
-			setCursor(0, 0);
-			HAL_TIM_Base_Stop_IT(&htim2);
-			HAL_TIM_Base_Stop_IT(&htim3);
 
-		}
-		return;
-	}
 	// reduce health and game over for waiting mario
-	if (current_state.clo == current_start_map -1) {
+	if (current_state.clo == current_start_map - 1) {
 
 		if (current_state.health > 0) {
 			current_state.health = current_state.health - 1;
-			setCursor(current_state.clo - current_start_map + 2, current_state.row);
+			setCursor(current_state.clo - current_start_map + 2,
+					current_state.row);
 			write(NONE);
 			map[current_state.row][current_state.clo] = NONE;
 			current_start_map = 0;
@@ -182,13 +159,13 @@ void print_map() {
 		return;
 	}
 	setCursor(1, 0);
-	for (int i = current_start_map ; i < current_start_map + 19; i++) {
-	     if (map[0][i] != MARIO) {
+	for (int i = current_start_map; i < current_start_map + 19; i++) {
+		if (map[0][i] != MARIO) {
 			write(map[0][i]);
 		}
 	}
 	setCursor(1, 2);
-	for (int i = current_start_map ; i < current_start_map + 19; i++) {
+	for (int i = current_start_map; i < current_start_map + 19; i++) {
 		if (map[2][i] != MARIO) {
 			write(map[2][i]);
 		}
@@ -197,6 +174,32 @@ void print_map() {
 	for (int i = current_start_map; i < current_start_map + 19; i++) {
 		if (map[3][i] != MARIO) {
 			write(map[3][i]);
+		}
+	}
+	//if go to pit
+	if (current_state.row == 3) {
+		if (current_state.health > 0) {
+			current_state.health = current_state.health - 1;
+			setCursor(current_state.clo - current_start_map + 2,
+					current_state.row);
+			write(NONE);
+			map[current_state.row][current_state.clo] = NONE;
+			current_start_map = 0;
+			current_state.clo = 2;
+			current_state.row = 2;
+			map[current_state.row][current_state.clo] = MARIO;
+			HAL_TIM_Base_Stop_IT(&htim2);
+			HAL_TIM_Base_Stop_IT(&htim3);
+			start = 0;
+		} else {
+			is_game_over = 1;
+			clear();
+			setCursor(6, 2);
+			print("GAME OVER");
+			setCursor(0, 0);
+			HAL_TIM_Base_Stop_IT(&htim2);
+			HAL_TIM_Base_Stop_IT(&htim3);
+
 		}
 	}
 

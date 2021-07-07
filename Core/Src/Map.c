@@ -17,6 +17,7 @@ byte Blade[] = { 0x18, 0x1F, 0x1F, 0x18, 0x18, 0x1F, 0x1F, 0x18 };
 byte None[] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim3;
+unsigned char strDate[2];
 
 void create_rows() {
 	srand(time(0));
@@ -126,7 +127,7 @@ void print_map() {
 	}
 
 	// reduce health and game over for waiting mario
-	if (current_state.clo == current_start_map -1) {
+	if (current_state.clo == current_start_map - 1) {
 
 		if (current_state.health > 0) {
 			reset_state();
@@ -134,29 +135,39 @@ void print_map() {
 			is_game_over = 1;
 			clear();
 			setCursor(6, 2);
+			current_state.row = 2;
+			current_state.clo = 3;
 			print("GAME OVER");
+			int n = sprintf(strDate, "SCORE IS %d", current_state.score);
+			setCursor(0, 0);
+			print(strDate);
 			setCursor(0, 0);
 			HAL_TIM_Base_Stop_IT(&htim2);
 
 		}
 		return;
 	}
-	shift_mario();
 
 	//if go to pit
-		if (current_state.row == 3) {
-			if (current_state.health > 0) {
-				reset_state();
-			} else {
-				is_game_over = 1;
-				clear();
-				setCursor(6, 2);
-				print("GAME OVER");
-				setCursor(0, 0);
-				HAL_TIM_Base_Stop_IT(&htim2);
+	if (current_state.row == 3) {
+		if (current_state.health > 0) {
+			reset_state();
+		} else {
+			is_game_over = 1;
+			clear();
+			setCursor(6, 2);
+			print("GAME OVER");
+			int n = sprintf(strDate, "SCORE IS %d", current_state.score);
+			setCursor(0, 0);
+			print(strDate);
+			setCursor(0, 0);
+			current_state.row = 2;
+			current_state.clo = 3;
+			current_state.score = 0;
+			HAL_TIM_Base_Stop_IT(&htim2);
 
-			}
 		}
+	}
 	setCursor(1, 0);
 	for (int i = current_start_map; i < current_start_map + 19; i++) {
 		if (map[0][i] != MARIO) {
@@ -176,16 +187,19 @@ void print_map() {
 		}
 	}
 
-
+	shift_mario();
 }
 void shift_display() {
 	if (current_start_map + 20 < 60) {
-		print_map();
 		current_start_map++;
+		print_map();
 	} else {
 		clear();
-		setCursor(0, 0);
+		setCursor(6, 2);
 		print("END GAME");
+		int n = sprintf(strDate, " SCORE IS %d", current_state.score);
+		setCursor(0, 0);
+		print(strDate);
 		setCursor(0, 0);
 		HAL_TIM_Base_Stop_IT(&htim2);
 
@@ -200,9 +214,9 @@ void clear_display() {
 	setCursor(0, 0);
 }
 void shift_mario() {
-	setCursor(current_state.clo - current_start_map + 1, current_state.row);
+	setCursor(current_state.clo - current_start_map + 2, current_state.row);
 	write(NONE);
-	setCursor(current_state.clo - current_start_map, current_state.row);
+	setCursor(current_state.clo - current_start_map + 1, current_state.row);
 	write(MARIO);
 
 }
@@ -217,10 +231,21 @@ void init_blade() {
 void reset_state() {
 	clear();
 	current_state.health = current_state.health - 1;
+	map[current_state.row][current_state.clo] = NONE;
+	if (current_state.health == 2)
+		HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_9);
+	else if (current_state.health == 1)
+		HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_10);
+	else if (current_state.health == 0)
+		HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_8);
 	current_start_map = 0;
 	map[2][3] = MARIO; //16
 	setCursor(3, 2);
 	write(MARIO);
+	current_state.score = 0;
+	score_1 = current_state.score % 10;
+	score_2 = current_state.score / 10;
+	submitNumbers(0, 0, 0, 0);
 	current_state.row = 2; //2
 	current_state.clo = 3; //16 //47 1000
 	map[2][2] = NONE;

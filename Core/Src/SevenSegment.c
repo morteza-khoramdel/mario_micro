@@ -29,18 +29,22 @@ void submitNumbers(int a1, int a2, int a3, int a4) {
 	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3,
 			0);
 	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3, 1);
+	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, 0);
 	numberTOBCD(a4);
 	HAL_Delay(3);
 	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_1, 0);
 	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_0 | GPIO_PIN_2 | GPIO_PIN_3, 1);
+	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, 1);
 	numberTOBCD(a3);
 	HAL_Delay(3);
 	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_2, 0);
 	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_3, 1);
+	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, 0);
 	numberTOBCD(a2);
 	HAL_Delay(3);
 	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_3, 0);
 	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2, 1);
+	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, 0);
 	numberTOBCD(a1);
 	HAL_Delay(3);
 }

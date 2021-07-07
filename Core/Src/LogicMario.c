@@ -7,6 +7,8 @@
 #include "Map.h"
 #include <LogicMario.h>
 #include "SevenSegment.h"
+#include "main.h"
+
 //0 for failed / 1 for successful /-1 for Game end /2 for
 int check_forward() {
 	if (current_state.clo < 60) {
@@ -23,12 +25,12 @@ int check_forward() {
 				return 2;
 			}
 			map[current_state.row][current_state.clo] = NONE;
-			setCursor(current_state.clo - current_start_map + 1,
+			setCursor(current_state.clo - current_start_map ,
 					current_state.row);
 			write(NONE);
 			current_state.clo = current_state.clo + 1;
 			map[current_state.row][current_state.clo] = MARIO;
-			setCursor(current_state.clo - current_start_map, current_state.row);
+			setCursor(current_state.clo - current_start_map , current_state.row);
 			write(MARIO);
 			return 1;
 
@@ -69,7 +71,7 @@ void jump_up() {
 	setCursor(current_state.clo - current_start_map + 1, current_state.row);
 	write(MARIO);
 	if (current_state.row
-			== 1&& map[current_state.row - 2][current_state.clo] == QUESTION_BOX) {
+			== 1&& map[current_state.row - 1][current_state.clo] == QUESTION_BOX) {
 		current_state.score = current_state.score + 1;
 		score_1  = current_state.score % 10;
 		score_2  =current_state.score /10;
@@ -87,6 +89,7 @@ void jump_down() {
 	write(MARIO);
 }
 void jump() {
+	HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_3);
 	if (state_jump < 4) {
 		switch (type_jump) {
 		case 2:
@@ -114,6 +117,7 @@ void jump() {
 	} else {
 		state_jump = 0;
 		type_jump = 0;
+		HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_3);
 	}
 }
 
